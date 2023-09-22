@@ -27,7 +27,37 @@
 
     <div> 
     <?php
+
     $N = 10; 
+
+    // Imprimir el tablero con letras del abecedario y números
+    function imprimirTablero($tablero) {
+        echo "<table>";
+        echo "<tr>";
+        echo "\t\t<td>&nbsp;</td>";
+        for ($i = 1; $i <= count($tablero); $i++) {
+            echo "\t\t<td>$i</td>";
+        }
+        echo "</tr>";
+    
+        for ($i = 65; $i < 65 + count($tablero); $i++) {
+            echo "<tr>";
+            $letter = chr($i);
+            echo "\t\t<td>$letter</td>\n";
+            for ($j = 1; $j <= count($tablero); $j++) {
+                echo "<td>{$tablero[$i - 65][$j - 1]}</td>"; 
+            }
+            echo "</tr>";
+        }
+        echo "</table>";
+        }
+
+    $barcos = [
+        ['nombre' => 'fragata', 'longitud' => 1],
+        ['nombre' => 'submarino', 'longitud' => 2],
+        ['nombre' => 'destructor', 'longitud' => 3],
+        ['nombre' => 'portaaviones', 'longitud' => 4],
+    ];
 
     // Creació array bidimensional 10 x 10 amb espais en blanc
     $tablero = array_fill(0, $N, array_fill(0, $N, "&nbsp;")); 
@@ -36,40 +66,65 @@
     function colocarBarco(&$tablero, $fila, $columna, $longitud, $orientacion) {
         if ($orientacion === 'horizontal') {
             for ($i = $columna; $i < $columna + $longitud; $i++) {
-                $tablero[$fila][$i] = 'S'; 
+                $tablero[$fila][$i] = 'B'; 
             }
         } elseif ($orientacion === 'vertical') {
             for ($i = $fila; $i < $fila + $longitud; $i++) {
-                $tablero[$i][$columna] = 'S'; 
+                $tablero[$i][$columna] = 'B'; 
             }
         }
     }
 
-    // Colocar un submarino de una longitud, la fila, columna, orientación horizontal
-    colocarBarco($tablero, 3, 4, 2, 'horizontal');
-    colocarBarco($tablero, 5, 6, 3, 'vertical');
-    colocarBarco($tablero, 8, 9, 1, 'vertical');
-    colocarBarco($tablero, 1, 2, 4, 'horizontal');
-
-    // Imprimir el tablero con letras del abecedario y números
-    echo "<table>";
-    echo "<tr>";
-    echo "\t\t<td>&nbsp;</td>";
-    for ($i = 1; $i <= $N; $i++) {
-        echo "\t\t<td>$i</td>";
+    // Fem els randoms entre els vaixells i files i columnes
+    function colocarBarcoAleatorio(&$tablero, $longitud) {
+        $N = count($tablero);
+    
+        do {
+            $fila = rand(0, $N - 1);
+            $columna = rand(0, $N - 1);
+            $orientacion = rand(0, 1) ? 'horizontal' : 'vertical';
+        } while (!esUbicacionValida($tablero, $fila, $columna, $longitud, $orientacion));
+    
+        colocarBarco($tablero, $fila, $columna, $longitud, $orientacion);
     }
-    echo "</tr>";
-
-    for ($i = 65; $i < 65 + $N; $i++) {
-        echo "<tr>";
-        $letter = chr($i);
-        echo "\t\t<td>$letter</td>\n";
-        for ($j = 1; $j <= $N; $j++) {
-            echo "<td>{$tablero[$i - 65][$j - 1]}</td>"; 
+    
+    // Función para verificar si una ubicación para un barco es válida
+    function esUbicacionValida($tablero, $fila, $columna, $longitud, $orientacion) {
+        $N = count($tablero);
+    
+        if ($orientacion === 'horizontal') {
+            if ($columna + $longitud > $N) {
+                return false; // El barco se sale de los límites del tablero
+            }
+    
+            for ($i = $columna; $i < $columna + $longitud; $i++) {
+                if ($tablero[$fila][$i] !== '&nbsp;') {
+                    return false; // El barco se solapa con otro barco
+                }
+            }
+        } elseif ($orientacion === 'vertical') {
+            if ($fila + $longitud > $N) {
+                return false; // El barco se sale de los límites del tablero
+            }
+    
+            for ($i = $fila; $i < $fila + $longitud; $i++) {
+                if ($tablero[$i][$columna] !== '&nbsp;') {
+                    return false; // El barco se solapa con otro barco
+                }
+            }
         }
-        echo "</tr>";
+    
+        return true;
     }
-    echo "</table>";
+
+    foreach ($barcos as $barco) {
+        colocarBarcoAleatorio($tablero, $barco['longitud']);
+    }
+
+    // Imprimir el tablero con los barcos
+    echo "<br><br>";
+    imprimirTablero($tablero);
+
     ?>
     </div>
     
